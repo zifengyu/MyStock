@@ -14,6 +14,7 @@ import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.time.Day;
 import org.jfree.data.time.Month;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -26,16 +27,22 @@ public class StockHistoryChart {
 	private TimeSeriesCollection priceDataSet;
 	private TimeSeries volumeSeries;
 	private TimeSeriesCollection volumeDataSet;
+	
+	private DateAxis dateAxis;
+	private NumberAxis priceAxis;
+	private NumberAxis volumeAxis;
+	
 	private int year = 2000;
 	private int period = 365;
 
 	public StockHistoryChart() {		
 
-		setDataSet(null, null);
+		priceDataSet = new TimeSeriesCollection();
+		volumeDataSet = new TimeSeriesCollection();		
 
-		DateAxis dateAxis = new DateAxis("Date");		
-		NumberAxis priceAxis = new NumberAxis("Price");
-		NumberAxis volumeAxis = new NumberAxis("Volume");
+		dateAxis = new DateAxis("Date");		
+		priceAxis = new NumberAxis("Price");
+		volumeAxis = new NumberAxis("Volume");		
 
 		XYItemRenderer renderer = new StandardXYItemRenderer();
 		XYPlot pricePlot = new XYPlot(priceDataSet, null, priceAxis, renderer);
@@ -59,20 +66,23 @@ public class StockHistoryChart {
 				);
 	}
 
-	public void addDataPoint(double data) {
-		priceSeries.add(new Year(year++), data);
-
+	public void setRange(Day startDay, Day endDay) {
+		//dateAxis.setR.setR.setRange(startDay, endDay);
 	}
 
 	public void setDataSet(TimeSeries priceSeries, TimeSeries volumeSeries) {
-		this.priceSeries = null == priceSeries ? new TimeSeries("PRICE") : priceSeries;
-		this.volumeSeries = null == volumeSeries ? new TimeSeries("VOLUME") : volumeSeries;
+		//this.priceSeries = null == priceSeries ? new TimeSeries("PRICE") : priceSeries;
+		//this.volumeSeries = null == volumeSeries ? new TimeSeries("VOLUME") : volumeSeries;
 
-		priceDataSet = new TimeSeriesCollection();
-		priceDataSet.addSeries(this.priceSeries);
-
-		volumeDataSet = new TimeSeriesCollection();
-		volumeDataSet.addSeries(this.volumeSeries);		
+		//priceDataSet = new TimeSeriesCollection();
+		this.priceSeries = priceSeries;
+		this.volumeSeries = volumeSeries;
+		priceDataSet.removeAllSeries();
+		priceDataSet.addSeries(priceSeries);
+		volumeDataSet.removeAllSeries();
+		volumeDataSet.addSeries(volumeSeries);
+		//volumeDataSet = new TimeSeriesCollection();
+		//volumeDataSet.addSeries(this.volumeSeries);		
 	}
 
 	public JFreeChart getChart() {

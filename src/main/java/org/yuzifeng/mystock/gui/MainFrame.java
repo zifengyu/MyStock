@@ -35,7 +35,12 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
+import org.yuzifeng.mystock.model.StockHistoryPrice;
+import org.yuzifeng.mystock.utils.*;
+
 import java.awt.Font;
+import java.io.IOException;
+
 import javax.swing.JButton;
 
 public class MainFrame extends JFrame {
@@ -149,8 +154,7 @@ public class MainFrame extends JFrame {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER) {  
 					String command = commandInputComp.getText();
 					commandHistoryComp.append(">" + command + "\n");
-					commandInputComp.setText("");  
-					stockChart.addDataPoint(Double.parseDouble(command));
+					commandInputComp.setText("");					
 				}  
 
 			}
@@ -163,13 +167,22 @@ public class MainFrame extends JFrame {
 		commandInputComp.setForeground(Color.ORANGE);
 		commandInputComp.setBackground(Color.BLACK);
 		panel_4.add(commandInputComp);
+		
+		StockHistoryPrice history = new StockHistoryPrice();
+		try {
+			StockHistoryFileUtils.loadFromFile(history, "C:\\ZS000001.SHP");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		stockChart.setDataSet(history.getClosePriceSeries(), history.getVolumeSeries());
 
 		//Focus on command line input component
 		pack();
 		setExtendedState(Frame.MAXIMIZED_BOTH);
 		commandInputComp.requestFocusInWindow();
 
-	}
+	}	
 
 	private void createMenu() {
 
