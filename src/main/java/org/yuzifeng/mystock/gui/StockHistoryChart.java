@@ -3,6 +3,7 @@ package org.yuzifeng.mystock.gui;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -29,7 +30,7 @@ import org.jfree.data.time.Year;
 import org.jfree.data.xy.XYDataset;
 
 public class StockHistoryChart {
-	
+
 	private String name;
 
 	private JFreeChart chart;
@@ -42,7 +43,7 @@ public class StockHistoryChart {
 	private DateAxis dateAxis;
 	private NumberAxis priceAxis;
 	private NumberAxis volumeAxis;
-	
+
 	private XYPlot pricePlot;
 	CombinedDomainXYPlot plot;
 
@@ -55,10 +56,10 @@ public class StockHistoryChart {
 	private double maxPriceAxis;	
 
 	public StockHistoryChart(String name) {
-		
+
 		this.name = name;
-		
-		
+
+
 
 		priceDataSet = new TimeSeriesCollection();
 		volumeDataSet = new TimeSeriesCollection();		
@@ -84,21 +85,28 @@ public class StockHistoryChart {
 		plot.add(pricePlot, 4);
 		plot.add(volumePlot, 1);
 		plot.setOrientation(PlotOrientation.VERTICAL);
-		
-		
+
+
 		chart = new JFreeChart(
 				null,
 				JFreeChart.DEFAULT_TITLE_FONT, 
 				plot, 
 				false
 				);
-		
+
 	}
-	
+
 	public String getName() {
 		return name;
 	}	
 	
+	public long getMinTime() {
+		return minTime;
+	}
+	
+	public long getMaxTime() {
+		return maxTime;
+	}
 
 	public void setDataSet(TimeSeries priceSeries, TimeSeries volumeSeries) {
 		//this.priceSeries = null == priceSeries ? new TimeSeries("PRICE") : priceSeries;
@@ -120,25 +128,34 @@ public class StockHistoryChart {
 		//volumeDataSet.addSeries(this.volumeSeries);		
 	}
 
-	public String getStockInfoInPage(int posX, int posY) {
-		/*
+	public String getStockInfoInPage(double posX, double posY) {
+
 		int index = getIndexInPage(posX);
-		
+
 		if (index < 0)
 			return null;	
 
 		TimeSeriesDataItem item = priceSeries.getDataItem(index);
 		Date date = item.getPeriod().getStart();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-		
+
 		String res = "Date\t: " + format.format(date) + "\nPrice\t: " + item.getValue().toString();
 		item = volumeSeries.getDataItem(index);
-		res += "\nVolume\t: " + item.getValue().toString();
-		//res += "\nxPos\t: " + format.format((new Date((long)((pageMax - pageMin) * posX + pageMin))));
-		//res += "\nyPos\t: " + ((maxPriceAxis - minPriceAxis) * posY + minPriceAxis);
-		}
-		*/
-		
+		DecimalFormat dformat = new DecimalFormat("###,###");
+		double vol = item.getValue().doubleValue();
+		res += "\nVolume\t: ";
+		if (vol > 1000000)
+			res += dformat.format(vol / 1000000) + "M";
+		else 		
+			res+= dformat.format(vol);
+		res += "\nxPos\t: " + format.format((new Date((long)((pageMax - pageMin) * posX + pageMin))));
+		dformat = new DecimalFormat("0.00"); 
+
+
+		res += "\nyPos\t: " + dformat.format(((maxPriceAxis - minPriceAxis) * posY + minPriceAxis));
+
+
+		/*
 		Point2D mousePoint2 = chartPanel.translateScreenToJava2D(new Point(posX, posY));
 		System.out.println("mouseX=" + posX + " mouseY=" + posY + "\n");
 		System.out.println("point2=" + mousePoint2 + "\n");
@@ -147,12 +164,12 @@ public class StockHistoryChart {
 		double price = priceAxis.java2DToValue(mousePoint2.getY(), chartPanel.getScreenDataArea(), plot.getRangeAxisEdge());
 		Date date2 = new Date(date);
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-		
-		String res = format.format(date2) + "\n" + price + "\n";
+
+		String res = format.format(date2) + "\n" + price + "\n";*/
 		//res = chartPanel.getChartRenderingInfo().getPlotInfo().getPlotArea().toString();
 		return res;
 	}
-	
+
 	public int getIndexInPage(double pos) {
 		long pTime = pageMin + (long)((pageMax - pageMin) * pos);
 
@@ -160,42 +177,51 @@ public class StockHistoryChart {
 		int index2 = 0;
 		int index = 0;
 
+		if (null == priceSeries)
+			return -1;
+		
 		int count = priceSeries.getItemCount();
 
 		if (0 == count)
 			return -1;
 
 		if (count > 1) {
-			while (index2 < count && priceSeries.getDataItem(index2).getPeriod().getFirstMillisecond() < pTime) {
+			while (index2 < count && priceSeries.getDataItem(index2).getPeriod().getFirstMillisecond() <= pTime) {
 				index1 = index2++;
 			}
 
 			if (index2 == count) {
 				index = count - 1;
 			} else {
+				if (index1 == -1)
+					index1 = index2;
 				long time1 = priceSeries.getDataItem(index1).getPeriod().getFirstMillisecond();
 				long time2 = priceSeries.getDataItem(index2).getPeriod().getFirstMillisecond();
 
 				index = (pTime - time1 < time2 - pTime) ? index1 : index2;
 			}
 		}
-		
+
 		return index;
 	}
-	
+
 	public void setPageRange(int month) {
-		timeRangePerPage = ((long)month) * 365 / 12 * 24 * 3600 * 1000;
+		timeRangePerPage = ((long)month) * 365 * 2 * 3600 * 1000;
 		setDateAxisRange(pageMax - timeRangePerPage, pageMax);
+	}
+	
+	public void setStartTime(long startTime) {
+		setDateAxisRange(startTime, startTime + timeRangePerPage);		
 	}
 
 	public void setDateAxisRange(long startTime, long endTime) {
-		
+
 		pageMin = startTime;
 		pageMax = endTime;
-		
+
 		int startIndex = getIndexInPage(0);
 		int endIndex = getIndexInPage(1);
-		
+
 		double minPrice = Double.MAX_VALUE;
 		double maxPrice = Double.MIN_VALUE;
 		if (startIndex != -1 && endIndex != -1) {
@@ -208,11 +234,11 @@ public class StockHistoryChart {
 			}
 		}
 		setPriceAxisRange(minPrice - (maxPrice - minPrice) / 3, maxPrice + (maxPrice - minPrice) / 3);
-			
+
 		dateAxis.setRange(pageMin, pageMax);
-		
+
 	}
-	
+
 	public void setPriceAxisRange(double lower, double upper) {
 		minPriceAxis = lower;
 		maxPriceAxis = upper;
@@ -226,7 +252,7 @@ public class StockHistoryChart {
 			setDateAxisRange(pageMin, pageMax);
 		}
 	}
-	
+
 	public void prevPage2() {
 		if (pageMin > minTime) {
 			pageMax = pageMin;
@@ -242,7 +268,7 @@ public class StockHistoryChart {
 			setDateAxisRange(pageMin, pageMax);
 		}
 	}
-	
+
 	public void nextPage2() {
 		if (pageMax < maxTime) {
 			pageMin = pageMax;
@@ -250,7 +276,7 @@ public class StockHistoryChart {
 			setDateAxisRange(pageMin, pageMax);
 		}
 	}
-	
+
 	public JFreeChart getChart() {
 		return chart;
 	}

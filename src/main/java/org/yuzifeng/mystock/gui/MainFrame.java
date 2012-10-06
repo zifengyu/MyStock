@@ -58,10 +58,7 @@ import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.RowSpec;
+import net.miginfocom.swing.MigLayout;
 
 public class MainFrame extends JFrame {
 
@@ -70,81 +67,81 @@ public class MainFrame extends JFrame {
 	private JTextArea stockInfoComp;	
 	private JTabbedPane tabbedPane;
 
-	//private StockHistoryChart stockChart;
 	private boolean enableCursor = false;
-	private JTextField textField;
 
 	private ChartPanel[] chartPanelList = new ChartPanel[5];
-	private StockHistoryChart[] stockHistoryChartList = new StockHistoryChart[5];
+	//private StockHistoryChart[] stockHistoryChartList = new StockHistoryChart[5];
+	private StockHistoryChartCollection stockHistoryChartList = new StockHistoryChartCollection();
+
 	private String BASE_PATH = "C:\\Users\\yua2\\workspace\\mystock\\src\\";
+	private String FILE_NAME_LIST[] = {
+			"ZS000001",
+			"ZS399001",
+			"ZS399005",
+			"ZS000001",
+			"ZS000001"
+	};	
 
-	public MainFrame() {
-
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public MainFrame() {		
 
 		// get screen dimensions
-		Toolkit kit = Toolkit.getDefaultToolkit();
-		Dimension screenSize = kit.getScreenSize();
-		int screenHeight = screenSize.height;
-		int screenWidth = screenSize.width;
+		//Toolkit kit = Toolkit.getDefaultToolkit();
+		//Dimension screenSize = kit.getScreenSize();
+		//int screenHeight = screenSize.height;
+		//int screenWidth = screenSize.width;
 
 		// set frame width, height and let platform pick screen location
-		setSize(screenWidth / 2, screenHeight / 2);
-		setLocationByPlatform(true);
+		//setSize(screenWidth / 2, screenHeight / 2);
+		//setLocationByPlatform(true);
 
 		// set frame icon and title
 		setTitle("MyStock");		
 
 		createMenu();
-		getContentPane().setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("1108px"),
-				FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-				ColumnSpec.decode("264px"),},
-				new RowSpec[] {
-				RowSpec.decode("816px"),
-				FormFactory.LINE_GAP_ROWSPEC,
-				RowSpec.decode("26px"),}));
+
+		getContentPane().setLayout(new MigLayout("", "[1105px][264px]", "[814px][5px][26px]"));
 
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		getContentPane().add(tabbedPane, "1, 1, fill, fill");
-		
-	
-		for (int i = 0; i < 5; ++i) {
+		getContentPane().add(tabbedPane, "cell 0 0,grow");
 
-			stockHistoryChartList[i] = new StockHistoryChart("ZS000001");
-			chartPanelList[i] = new ChartPanel(stockHistoryChartList[i].getChart());
-			stockHistoryChartList[i].chartPanel = chartPanelList[i];			
+		for (int i = 0; i < 3; ++i) {
+
+			int index = stockHistoryChartList.createNewChart(FILE_NAME_LIST[i]);
+
+
+			chartPanelList[i] = new ChartPanel(stockHistoryChartList.getChart(index).getChart());
+			//stockHistoryChartList[i].chartPanel = chartPanelList[i];			
 			chartPanelList[i].addChartMouseListener(new ChartMouseAdaptor(i));
 			chartPanelList[i].setDomainZoomable(false);
 			chartPanelList[i].setRangeZoomable(false);		
 			chartPanelList[i].setHorizontalAxisTrace(false);
 			chartPanelList[i].setVerticalAxisTrace(false);
-			tabbedPane.addTab("New tab", null, chartPanelList[i], null);
+			tabbedPane.addTab(FILE_NAME_LIST[i], null, chartPanelList[i], null);
 
-			StockHistoryPrice history = new StockHistoryPrice();
+
 			try {
-				StockHistoryFileUtils.loadFromFile(history, BASE_PATH + "data\\ZS000001.SHP");
+				StockHistoryPrice history = new StockHistoryPrice();
+				StockHistoryFileUtils.loadFromFile(history, BASE_PATH + "data\\" + FILE_NAME_LIST[i] + ".SHP");		
+				stockHistoryChartList.setData(index, history.getClosePriceSeries(), history.getVolumeSeries());
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			stockHistoryChartList[i].setDataSet(history.getClosePriceSeries(), history.getVolumeSeries());
-
 
 		}
-		
-		
+		long startTime = stockHistoryChartList.getMaxTime() - 360L * 24 * 3600 * 1000;
+		stockHistoryChartList.setStartTime(startTime);
 
 		JPanel panel_2 = new JPanel();
-		getContentPane().add(panel_2, "3, 1, 1, 3, fill, fill");
+		getContentPane().add(panel_2, "cell 1 0 1 3,grow");
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
 		gbl_panel_2.columnWeights = new double[]{1.0};
 		gbl_panel_2.rowWeights = new double[]{0.0, 0.0};
 		panel_2.setLayout(gbl_panel_2);
 
 		stockInfoComp = new JTextArea();
-		stockInfoComp.setFont(new Font("Monospaced", Font.PLAIN, 20));
+		stockInfoComp.setFont(new Font("Monospaced", Font.PLAIN, 18));
 		JScrollPane scrollPane = new JScrollPane(stockInfoComp);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -161,14 +158,6 @@ public class MainFrame extends JFrame {
 		stockInfoComp.setBackground(Color.BLACK);
 		stockInfoComp.setEditable(false);
 		stockInfoComp.setForeground(Color.ORANGE);
-		GridBagConstraints gbc_textArea = new GridBagConstraints();
-		gbc_textArea.anchor = GridBagConstraints.NORTH;
-		gbc_textArea.fill = GridBagConstraints.BOTH;
-		gbc_textArea.insets = new Insets(0, 0, 5, 0);
-		gbc_textArea.gridx = 0;
-		gbc_textArea.gridy = 0;
-		gbc_textArea.weightx = 0.0;
-		gbc_textArea.weighty = 100.0;		
 		//panel_2.add(stockInfoComp, gbc_textArea);
 
 		commandHistoryComp = new JTextArea();
@@ -188,7 +177,7 @@ public class MainFrame extends JFrame {
 		commandHistoryComp.setBackground(Color.BLACK);
 
 		JPanel panel_4 = new JPanel();
-		getContentPane().add(panel_4, "1, 3, fill, fill");
+		getContentPane().add(panel_4, "cell 0 2,grow");
 		panel_4.setLayout(new BorderLayout(0, 0));
 
 		commandInputComp = new JTextField();
@@ -202,11 +191,19 @@ public class MainFrame extends JFrame {
 		commandInputComp.setForeground(Color.ORANGE);
 		commandInputComp.setBackground(Color.BLACK);
 		panel_4.add(commandInputComp);
+		commandInputComp.requestFocusInWindow();
+		GridBagConstraints gbc_textArea = new GridBagConstraints();
+		gbc_textArea.anchor = GridBagConstraints.NORTH;
+		gbc_textArea.fill = GridBagConstraints.BOTH;
+		gbc_textArea.insets = new Insets(0, 0, 5, 0);
+		gbc_textArea.gridx = 0;
+		gbc_textArea.gridy = 0;
+		gbc_textArea.weightx = 0.0;
+		gbc_textArea.weighty = 100.0;		
 
 
 		//Focus on command line input component
 		pack();
-		commandInputComp.requestFocusInWindow();
 		setExtendedState(Frame.MAXIMIZED_BOTH);
 	}	
 
@@ -236,22 +233,29 @@ public class MainFrame extends JFrame {
 		private String processCommand(String cmd) {
 			String res = "Error in processing command.";
 
-			StockHistoryChart stockChart = stockHistoryChartList[0];
-
 			String[] tokens = cmd.split("\\s");
-			if (tokens[0].equalsIgnoreCase("p")) {
-				stockChart.prevPage();
-				res = "OK";				
-			} else if (tokens[0].equalsIgnoreCase("p2")) {
-				stockChart.prevPage2();
-				res = "OK";
-			} else if (tokens[0].equalsIgnoreCase("n")) {
-				stockChart.nextPage();
-				res = "OK";
-			} else if (tokens[0].equalsIgnoreCase("n2")) {
-				stockChart.nextPage2();
-				res = "OK";
+			if (tokens[0].equalsIgnoreCase("p")) {		
+
+				int index = 1;
+				while (index < tokens.length && tokens[index].length() == 0)
+					++index;
+				int month = 1;
+				if (index < tokens.length) {
+					month = Integer.parseInt(tokens[index]);						
+				}
+				stockHistoryChartList.prev(month);
+				res = "Move to previous " + month + " month.";
+			}  else if (tokens[0].equalsIgnoreCase("n")) {
+				int index = 1;
+				while (index < tokens.length && tokens[index].length() == 0)
+					++index;
+				int month = 1;
+				if (index < tokens.length) {
+					month = Integer.parseInt(tokens[index]);						
+				}stockHistoryChartList.next(month);
+				res = "Move to next " + month + " month.";
 			} else if (tokens[0].equalsIgnoreCase("y")) {
+				/*
 				int index = 1;
 				while (index < tokens.length && tokens[index].length() == 0)
 					++index;
@@ -267,7 +271,7 @@ public class MainFrame extends JFrame {
 							res = "Set Y axis range : " + low + "-" + high;
 						}
 					}
-				}
+				}*/
 
 			} else if (tokens[0].equalsIgnoreCase("r")) {
 				int index = 1;
@@ -276,7 +280,7 @@ public class MainFrame extends JFrame {
 				if (index < tokens.length) {
 					int m = Integer.parseInt((tokens[index]));
 					if (m >= 1) {
-						stockChart.setPageRange(m);
+						stockHistoryChartList.setPageRange(m);
 						res = "Set page range : " + tokens[index] + " months";
 					}
 
@@ -289,9 +293,11 @@ public class MainFrame extends JFrame {
 	}
 
 	private class ChartMouseAdaptor implements ChartMouseListener {
-		
+
+		/*This is not safe, should be rewritten*/
+
 		private int index;
-		
+
 		public ChartMouseAdaptor(int index) {
 			this.index = index;
 		}
@@ -299,7 +305,7 @@ public class MainFrame extends JFrame {
 		public void chartMouseClicked(ChartMouseEvent event) {
 			if(event.getTrigger().getButton() == MouseEvent.BUTTON1 && event.getTrigger().getClickCount() >= 2){
 				enableCursor = !enableCursor;
-				for (int i = 0; i < 5; ++i) {
+				for (int i = 0; i < 3; ++i) {
 					chartPanelList[i].setHorizontalAxisTrace(enableCursor);
 					chartPanelList[i].setVerticalAxisTrace(enableCursor);
 				}
@@ -324,26 +330,15 @@ public class MainFrame extends JFrame {
 
 					} else {*/
 					if (e instanceof PlotEntity) {
-						PlotEntity en = (PlotEntity)e;
-						
-						
 						Rectangle bounds = e.getArea().getBounds();
-						int minX = bounds.x;			
-						
-						int minY = bounds.y;
 						int mouseX = event.getTrigger().getX();
 						int mouseY = event.getTrigger().getY();
 						Point2D mousePoint2 = chartPanelList[index].translateScreenToJava2D(new Point(mouseX, mouseY));						
 						double posX = (mousePoint2.getX() - bounds.x) / bounds.width;
 						double posY = 1 - (mousePoint2.getY() - bounds.y) / bounds.height;						
-						display = stockHistoryChartList[index].getStockInfoInPage(mouseX, mouseY);
-
-						
-						stockInfoComp.setText(display + "\nminX:" + minX + " mouseX:" + mouseX + " minY:" + minY + " mouseY:" + mouseY
-								+ "\n" + en.getArea() + "\n" + posX + "," + posY);
-						
+						display = stockHistoryChartList.getChart(index).getStockInfoInPage(posX, posY);
+						stockInfoComp.setText(display);
 					}
-
 				}
 			}
 		}
@@ -357,7 +352,8 @@ public class MainFrame extends JFrame {
 		SwingUtilities.invokeLater(new Runnable() {
 
 			public void run() {
-				MainFrame frame = new MainFrame();				
+				MainFrame frame = new MainFrame();	
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setVisible(true);
 			}});
 
