@@ -38,7 +38,7 @@ public class StockHistoryPrice {
 		
 		return overwriteCount;		
 	}	
-
+	
 	public TimeSeries getOpenPriceSeries() {
 		return openPriceSeries;
 	}

@@ -138,7 +138,7 @@ public class StockHistoryFileUtils {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		mergeFilesInFolder("C:\\Temp", "ZS000001.SHP");
+		mergeFilesInFolder("C:\\Temp", "ZS399005.SHP");
 	}
 
 }
