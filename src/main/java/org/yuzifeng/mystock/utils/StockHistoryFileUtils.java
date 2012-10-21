@@ -108,7 +108,7 @@ public class StockHistoryFileUtils {
 
 	}
 
-	public static void mergeFilesInFolder(String folderPath, String targetFileName) {
+	public static void mergeFilesInFolder(String folderPath, String targetFileName, boolean clear) {
 		File directory = new File(folderPath);
 		if (directory.isDirectory()) {
 			StockHistoryPrice history = new StockHistoryPrice();
@@ -123,12 +123,21 @@ public class StockHistoryFileUtils {
 					}
 				}
 			}
+			
+			File targetFile = new File(directory.getAbsolutePath() + "\\" + targetFileName);
 
 			try {
-				saveToFile(history, directory.getAbsolutePath() + "\\" + targetFileName);
+				
+				saveToFile(history, targetFile.getAbsolutePath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			
+			for (int i = 0; i < sourceList.length; ++i) {
+				if (sourceList[i].isFile() && (!sourceList[i].getName().equalsIgnoreCase(targetFile.getName()))) {
+					sourceList[i].delete();
+				}
 			}
 
 		}
@@ -138,7 +147,14 @@ public class StockHistoryFileUtils {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		mergeFilesInFolder("C:\\Temp", "ZS399005.SHP");
+		File rootFolder = new File("C:\\Users\\yua2\\git\\MyStock\\src\\data\\");
+		File[] folderList = rootFolder.listFiles();
+		for (int i = 0; i < folderList.length; ++i) {
+			if (folderList[i].isDirectory()) {
+				mergeFilesInFolder(folderList[i].getAbsolutePath(), folderList[i].getName() + ".SHP", true);
+			}
+		}
+		
 	}
 
 }

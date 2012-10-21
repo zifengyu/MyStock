@@ -107,6 +107,10 @@ public class StockHistoryChart {
 	public long getMaxTime() {
 		return maxTime;
 	}
+	
+	public long getPageMinTime() {
+		return pageMin;
+	}
 
 	public void setDataSet(TimeSeries priceSeries, TimeSeries volumeSeries) {
 		//this.priceSeries = null == priceSeries ? new TimeSeries("PRICE") : priceSeries;

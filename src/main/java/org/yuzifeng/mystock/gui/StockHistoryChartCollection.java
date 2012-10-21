@@ -59,7 +59,8 @@ public class StockHistoryChartCollection {
 		Iterator<StockHistoryChart> iter = chartList.iterator();
 		while (iter.hasNext()) {
 			StockHistoryChart chart = iter.next();
-			chart.setPageRange(pageTimeInMonth);							
+			chart.setPageRange(pageTimeInMonth);	
+			startTime = chart.getPageMinTime();
 		}
 	}
 	
