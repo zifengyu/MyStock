@@ -167,7 +167,7 @@ public class MainFrame extends JFrame {
 		stockInfoComp.setBackground(Color.BLACK);
 		stockInfoComp.setEditable(false);
 		stockInfoComp.setForeground(Color.ORANGE);
-		panel_2.setBorder(new EmptyBorder(0,0,0,10));
+		panel_2.setBorder(new EmptyBorder(0,0,5,8));
 
 		commandHistoryComp = new JTextArea();
 		commandHistoryComp.setLineWrap(true);
@@ -189,7 +189,7 @@ public class MainFrame extends JFrame {
 		addComponent(panel_1, panel_3, 2, 1, 1, 1, 0, 0.5, GridBagConstraints.CENTER, GridBagConstraints.BOTH);		
 		commandHistoryComp.setForeground(Color.ORANGE);
 		commandHistoryComp.setBackground(Color.BLACK);
-		scrollpanel_2.setBorder(new EmptyBorder(5,0,0,10));
+		scrollpanel_2.setBorder(new EmptyBorder(0,0,0,8));
 
 		JPanel panel_4 = new JPanel();
 		getContentPane().add(panel_4, BorderLayout.SOUTH);
@@ -215,7 +215,7 @@ public class MainFrame extends JFrame {
 		gbc_textArea.gridy = 0;
 		gbc_textArea.weightx = 0.0;
 		gbc_textArea.weighty = 100.0;		
-
+		panel_4.setBorder(new EmptyBorder(5,0,5,8));
 
 		//Focus on command line input component
 		pack();
