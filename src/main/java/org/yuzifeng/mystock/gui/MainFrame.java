@@ -3,12 +3,9 @@ package org.yuzifeng.mystock.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -16,8 +13,6 @@ import javax.swing.JMenuBar;
 import javax.swing.SwingUtilities;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
@@ -70,7 +65,7 @@ public class MainFrame extends JFrame {
 
 	private boolean enableCursor = false;
 
-	private ChartPanel[] chartPanelList = new ChartPanel[5];
+	private ChartPanel[] chartPanelList = new ChartPanel[10];
 	//private StockHistoryChart[] stockHistoryChartList = new StockHistoryChart[5];
 	private StockHistoryChartCollection stockHistoryChartList = new StockHistoryChartCollection();
 
@@ -79,7 +74,9 @@ public class MainFrame extends JFrame {
 			"ZS000001",
 			"ZS399001",
 			"ZS399005",
-			"ZS000300"
+			"ZS000300",
+			"002024",
+			"000858"
 	};	
 
 	private int tabCount = FILE_NAME_LIST.length;
